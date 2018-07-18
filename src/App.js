@@ -58,12 +58,9 @@ class App extends Component {
               <Input placeholder="comment here" s={12} value={this.state.message} onChange={this.handleMessageInput} />
             </Row>
 
-            <Row>
-              <Button onClick={() => this.setState({message: ''})}>Cancel</Button>
-              <Button onClick={this.handleSubmit} disabled={this.state.message.length <= 0}>Submit</Button>
             <Row style={{textAlign: 'right'}}>
-                <Button>&#10007;</Button>
-                <Button>&#10003;</Button>
+              <Button onClick={() => this.setState({message: ''})}>&#10007;</Button>
+              <Button onClick={this.handleSubmit} disabled={this.state.message.length <= 0}>&#10003;</Button>
             </Row>
         </div>
 
