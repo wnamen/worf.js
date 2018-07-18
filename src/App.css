@@ -5,3 +5,7 @@
 .error {
   background-color: yellow;
 }
+
+.message {
+  text-indent: 50px;
+}
