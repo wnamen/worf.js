@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Row, Input, Navbar, NavItem, Button, Chip  } from 'react-materialize';
+import { Row, Navbar, NavItem, Button, Chip  } from 'react-materialize';
+import ContentEditable from './ContentEditable.js';
 import moment from 'moment';
-import logo from './logo.svg';
+import rp from 'request-promise';
 import './App.css';
 
 class App extends Component {
@@ -10,6 +11,7 @@ class App extends Component {
 
         this.state = {
             message: '',
+            sentiment: '',
             comments: [{
                 name: 'lewhat',
                 date: '12/32/45',
@@ -40,26 +42,57 @@ class App extends Component {
 
     handleMessageInput = (e) => {
         this.setState({message: e.target.value})
-    }
+    };
 
     handleSubmit = () => {
-        this.setState({message: '', comments: [{name: 'Guest', date: moment(), message: this.state.message}, ...this.state.comments]})
-    }
+        rp({
+            method: 'get',
+            url: `https://us-central1-worf-js.cloudfunctions.net/helloworld?message=${this.state.message}`,
+            json: true
+        }).then(res => {
+            if (res.pass) {
+                this.setState({message: '', comments: [{name: 'Guest', date: moment(), message: this.state.message}, ...this.state.comments]})
+            } else {
+
+                console.log(res);
+
+                if (res.problemIndices === -1) {
+                    this.setState({
+                        message: `<span className="error">${this.state.message}</span>`,
+                        sentiment: 'Please review your message for errors you dumbass.'
+                    })
+
+                } else {
+                    let sentences = this.state.message.match(/([^.?!])*[.?!]?/g);
+
+                    res.problemIndices.forEach((index) => {
+                        sentences[index] = `<span style={{backgroundColor: 'yellow'}}>${sentences[index]}</span>`
+                    });
+
+                    this.setState({
+                        message: sentences.join(' '),
+                        sentiment: 'Please review your message for errors you dumbass.'
+                    })
+                }
+            }
+        }).catch( err => {
+            console.log(err)
+        });
+    };
 
   render() {
+      console.log(this.state)
     return (
-      <div>
+      <div className="App">
         <Navbar>
             <NavItem>600 Comments</NavItem>
         </Navbar>
 
         <div>
-            <Row>
-              <Input placeholder="comment here" s={12} value={this.state.message} onChange={this.handleMessageInput} />
-            </Row>
-
+            <ContentEditable placeholder="comment here" s={12} name="message" html={this.state.message} onChange={this.handleMessageInput} />
+            { this.state.sentiment }
             <Row style={{textAlign: 'right'}}>
-              <Button onClick={() => this.setState({message: ''})}>&#10007;</Button>
+              <Button onClick={() => this.setState({message: '', sentiment: ''})}>&#10007;</Button>
               <Button onClick={this.handleSubmit} disabled={this.state.message.length <= 0}>&#10003;</Button>
             </Row>
         </div>
@@ -70,7 +103,7 @@ class App extends Component {
                     return (
                         <Row key={idx} s={12}>
                             <Chip>{comment.name}</Chip>
-                            <span>{moment().calendar()}</span>
+                            <small>{moment().calendar()}</small>
                             <p>{comment.message}</p>
                         </Row>
                     )
