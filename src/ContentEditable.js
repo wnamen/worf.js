@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 class ContentEditable extends Component {
     render = () => {
         return <div
+            className={this.props.className}
             onInput={this.emitChange}
             onBlur={this.emitChange}
             contentEditable

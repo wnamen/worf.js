@@ -59,19 +59,20 @@ class App extends Component {
                 if (res.problemIndices === -1) {
                     this.setState({
                         message: `<span class="error">${this.state.message}</span>`,
-                        sentiment: 'Please review your message for errors you dumbass.'
+                        sentiment: 'You might want to rewrite your entire message.'
                     })
 
                 } else {
                     let sentences = this.state.message.match(/([^.?!])*[.?!]?/g);
 
                     res.problemIndices.forEach((index) => {
-                        sentences[index] = `<span class="red">${sentences[index]}</span>`
+                        sentences[index] = `<span class="error">${sentences[index]}</span>`
+                        console.log(sentences[index])
                     });
 
                     this.setState({
                         message: sentences.join(' '),
-                        sentiment: 'Please review your message for errors you dumbass.'
+                        sentiment: 'Seems like your are trying to post a negative comment. Consider changing the highlighted messages.'
                     })
                 }
             }
@@ -85,10 +86,11 @@ class App extends Component {
     return (
       <div className="App">
         <Collection>
-            <CollectionItem>600 Comments</CollectionItem>
             <CollectionItem>
-                <ContentEditable placeholder="comment here" s={12} name="message" html={this.state.message} onChange={this.handleMessageInput} />
-                { this.state.sentiment }
+                <ContentEditable className="input-box" placeholder="comment here" s={12} name="message" html={this.state.message} onChange={this.handleMessageInput} />
+                {
+                    this.state.sentiment && (<span className="error-message">{ this.state.sentiment }</span>)
+                }
                 <Row style={{textAlign: 'right'}}>
                     <Button className="red" onClick={() => this.setState({message: '', sentiment: ''})}>&#10007;</Button>
                     <Button onClick={this.handleSubmit} disabled={this.state.message.length <= 0}>&#10003;</Button>
