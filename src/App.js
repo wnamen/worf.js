@@ -47,12 +47,12 @@ class App extends Component {
 
         <div>
             <Row>
-              <Input placeholder="comment here" s={6} />
+              <Input placeholder="comment here" s={12} />
             </Row>
 
-            <Row>
-              <Button>Cancel</Button>
-              <Button>Submit</Button>
+            <Row style={{textAlign: 'right'}}>
+                <Button>&#10007;</Button>
+                <Button>&#10003;</Button>
             </Row>
         </div>
 
@@ -60,7 +60,7 @@ class App extends Component {
             {
                 this.state.comments.map((comment, idx)=>{
                     return (
-                        <Row key={idx}>
+                        <Row key={idx} s={12}>
                             <Chip>{comment.name}</Chip>
                             <span>{moment().calendar()}</span>
                             <p>{comment.message}</p>
