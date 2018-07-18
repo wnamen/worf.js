@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Row, Input, Navbar, NavItem, Button, Card  } from 'react-materialize';
+import { Row, Input, Navbar, NavItem, Button, Chip  } from 'react-materialize';
+import moment from 'moment';
 import logo from './logo.svg';
 import './App.css';
 
@@ -40,31 +41,34 @@ class App extends Component {
   render() {
     return (
       <div>
-            <Navbar>
-               <NavItem>600 Comments</NavItem>
-            </Navbar>
+        <Navbar>
+            <NavItem>600 Comments</NavItem>
+        </Navbar>
+
+        <div>
             <Row>
               <Input placeholder="comment here" s={6} />
             </Row>
+
             <Row>
               <Button>Cancel</Button>
               <Button>Submit</Button>
             </Row>
-            <Row>
-                {
-                    this.state.comments.map((comment, idx)=>{
-                        return (
-                            <Card key={idx}>
-                                <p>
-                                    <span>{comment.name}</span>
-                                    <span> {comment.date}</span>
-                                </p>
-                                    <p>{comment.message}</p>
-                            </Card>
-                        )
-                    })
-                }
-            </Row>
+        </div>
+
+        <Row>
+            {
+                this.state.comments.map((comment, idx)=>{
+                    return (
+                        <Row key={idx}>
+                            <Chip>{comment.name}</Chip>
+                            <span>{moment().calendar()}</span>
+                            <p>{comment.message}</p>
+                        </Row>
+                    )
+                })
+            }
+        </Row>
       </div>
     );
   }
