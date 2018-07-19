@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Button, Chip, Collection, CollectionItem, Card  } from 'react-materialize';
-import ContentEditable from './ContentEditable.js';
+import { Row, Button, Chip, Collection, CollectionItem, Card } from 'react-materialize';
 import FormInput from './FormInput.js';
 import moment from 'moment';
 import rp from 'request-promise';
@@ -11,39 +10,53 @@ class App extends Component {
         super(props);
 
         this.state = {
+            loading: true,
+            reply: false,
             message: '',
             sentiment: '',
             comments: [{
-                name: 'Sam',
+                username: 'lewhat',
                 image: 'https://owl.cbsi.com/jira/secure/useravatar?ownerId=sdarb0326&avatarId=28101',
-                date: '12/32/45',
-                message: 'hello peoples'
+                date: '2018-07-05T09:32:55',
+                text: 'FANTASTIC!!!  as a fellow sailor I very often watch "sailing" videos...your channel is by far the best..this is what I want to see. wind, waves smoking cigarettes and eating cold spaghetti from the tin... not yoga, quinoa and selfies diving a reef in flat calm Bahamas...you are a true seaman my friend.. respect!!'
             },
             {
-                name: 'Keerthi',
+                username: 'Erik',
                 image: 'https://owl.cbsi.com/jira/secure/useravatar?ownerId=kbasireddy&avatarId=12915',
-                date: '12/32/45',
-                message: 'hello peoples'
+                date: '2018-07-03T23:45:01',
+                text: 'Thank you so much everyone of you, for all your nice comments! Im throughly touched!! My work gets 100 times more valuable and meaningful getting all this positive feedback...! The sky is not the limit, the space is above :) I will do my best to continue making more inspiring videos. STAY TUNED!'
             },
             {
-                name: 'Nick',
+                username: 'dave',
                 image: 'https://owl.cbsi.com/jira/secure/useravatar?avatarId=10122',
-                date: '12/32/45',
-                message: 'hello peoples'
+                date: '2018-07-03T06:01:54',
+                text: 'Sincerely, I would have panicked hundred times ! Really impressive how he takes all challenges with calm. A real viking. Did you notice the delphine at minute 15:02 !! ? Very inspiring video'
             },
             {
-                name: 'William',
+                username: 'muschek',
                 image: 'https://owl.cbsi.com/jira/secure/useravatar?avatarId=10102',
-                date: '12/32/45',
-                message: 'hello peoples'
+                date: '2018-07-02T13:21:32',
+                text: "Everything is AMAZING: The hero, The story, The film, The music! Best documental story about sailing, yacht and huge love to the sea. Thank's man. Allow me to shake your hand virtually at least ;)"
             },
             {
-                name: 'lewhat',
+                username: 'fabrice',
                 image: 'https://owl.cbsi.com/jira/secure/useravatar?ownerId=lweld1127&avatarId=23500',
-                date: '12/32/45',
-                message: 'hello peoples'
+                date: '2018-07-01T12:32:12',
+                text: "It's is in fact one of the best sailing videos out there. No beaches, just wind and waves. Congrats Erik, well done!"
             }]
         }
+    }
+
+    componentWillMount = () => {
+        rp({
+            method: 'get',
+            url: `http://10.16.190.135:8020/api/messages/idaily?canon=${window.location.href}`,
+            json: true
+        }).then(res => {
+            this.setState({comments: res, loading: false})
+        }).catch(err => {
+            console.log(err)
+        })
     }
 
     handleMessageInput = (e) => {
@@ -53,13 +66,28 @@ class App extends Component {
         this.setState({message: '', sentiment: ''});
     }
     handleSubmit = () => {
+        this.setState({loading:true});
         rp({
             method: 'get',
             url: `https://us-central1-worf-js.cloudfunctions.net/helloworld?message=${this.state.message}`,
             json: true
         }).then(res => {
             if (res.pass) {
-                this.setState({message: '', comments: [{name: 'Guest', date: moment(), message: (this.state.message).replace(/<(?:.|\n)*?>/gm, '')}, ...this.state.comments]})
+                rp({
+                    method: 'post',
+                    url: 'http://10.16.190.135:8020/api/messages/idaily',
+                    body: {
+                        canon: window.location.href,
+                        text: this.state.message,
+                        name: 'Guest'
+                    },
+                    json: true
+                }).then(res => {
+                    this.setState({message: '', comments: res, loading: false})
+                }).catch(err => {
+                    console.log(err)
+                })
+
             } else {
 
                 console.log(res);
@@ -67,7 +95,8 @@ class App extends Component {
                 if (res.problemIndices === -1) {
                     this.setState({
                         message: `<span class="error">${this.state.message}</span>`,
-                        sentiment: 'You might want to rewrite your entire message.'
+                        sentiment: 'You might want to rewrite your entire message.',
+                        loading: false
                     })
 
                 } else {
@@ -80,7 +109,8 @@ class App extends Component {
 
                     this.setState({
                         message: sentences.join(' '),
-                        sentiment: 'Seems like your are trying to post a negative comment. Consider changing the highlighted messages.'
+                        sentiment: 'Seems like your are trying to post a negative comment. Consider changing the highlighted messages.',
+                        loading: false
                     })
                 }
             }
@@ -90,18 +120,19 @@ class App extends Component {
     };
 
     replySupport = () => {
-        this.setState({reply: true});
+        this.setState({reply: !this.state.reply});
     }
 
   render() {
       console.log(this.state)
     return (
       <div className="App">
-        <Collection>
+        <Collection header={`${this.state.comments.length} Comments`}>
             <CollectionItem>
                 <FormInput message={this.state.message}
-                           handleMessageInput={this.handleMessageInput}
+                           loading={this.state.loading}
                            sentiment={this.state.sentiment}
+                           handleMessageInput={this.handleMessageInput}
                            handleClearMessage={this.handleClearMessage}
                            handleSubmit={this.handleSubmit}/>
             </CollectionItem>
@@ -110,13 +141,18 @@ class App extends Component {
                     this.state.comments.map((comment, idx)=>{
                         return (
                             <Card key={idx} s={12}>
-                                <Chip>
-                                <img src={comment.image} width='20' alt="profile image"/>
-                                {comment.name}
-                                </Chip>
-                                <small>{moment().calendar()}</small>
-                                <p className="message">{comment.message}</p>
+                                <div>
+                                    <Chip>
+                                        <img src={comment.image || 'https://owl.cbsi.com/jira/secure/useravatar?ownerId=kbasireddy&avatarId=12915'} width='20' alt="profile image"/>
+                                        {comment.username}
+                                    </Chip>
+                                    <small>{moment(comment.date).fromNow()}</small>
+                                </div>
+
+                                <p className="message">{comment.text}</p>
+
                                 <Button className="reply-button" onClick={this.replySupport}>Reply</Button>
+
                                 {
                                     this.state.reply && (<FormInput message={this.state.message}
                                                                    handleMessageInput={this.handleMessageInput}

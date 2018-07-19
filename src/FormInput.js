@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Button } from 'react-materialize';
+import { Row, Button, ProgressBar } from 'react-materialize';
 import ContentEditable from './ContentEditable.js';
 import './App.css';
 
@@ -11,6 +11,7 @@ class FormInput extends Component {
         return (
             <div className="App">
                 <ContentEditable className="input-box" placeholder="comment here" s={12} name="message" html={this.props.message} onChange={this.props.handleMessageInput} />
+                { this.props.loading && <ProgressBar /> }
                 {
                     this.props.sentiment && (<span className="error-message">{ this.props.sentiment }</span>)
                 }
