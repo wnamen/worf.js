@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Row, Button, Chip, Collection, CollectionItem, Card } from 'react-materialize';
+import { Row, Button, Chip, Collection, CollectionItem, Collapsible, CollapsibleItem, Card } from 'react-materialize';
 import FormInput from './FormInput.js';
 import moment from 'moment';
 import rp from 'request-promise';
@@ -11,9 +11,11 @@ class App extends Component {
 
         this.state = {
             loading: true,
-            reply: false,
+            replyLoading: false,
+            reply: '',
             message: '',
             sentiment: '',
+            replySentiment: '',
             comments: [{
                 username: 'lewhat',
                 date: '2018-07-05T09:32:55',
@@ -57,8 +59,14 @@ class App extends Component {
     handleMessageInput = (e) => {
         this.setState({message: e.target.value})
     };
+    handleReplyInput = (e) => {
+        this.setState({reply: e.target.value})
+    };
     handleClearMessage = () => {
         this.setState({message: '', sentiment: ''});
+    }
+    handleClearReply = () => {
+        this.setState({reply: '', replySentiment: ''});
     }
     handleSubmit = () => {
         this.setState({loading:true});
@@ -78,14 +86,12 @@ class App extends Component {
                     },
                     json: true
                 }).then(res => {
-                    this.setState({message: '', comments: res, loading: false})
+                    this.setState({message: '', comments: res, sentiment: '', loading: false})
                 }).catch(err => {
                     console.log(err)
                 })
 
             } else {
-
-                console.log(res);
 
                 if (res.problemIndices === -1) {
                     this.setState({
@@ -114,17 +120,52 @@ class App extends Component {
         });
     };
 
-    replySupport = () => {
-        this.setState({reply: !this.state.reply});
-    }
+    handleSubmitReply = (id) => {
+        console.log(id, '*****')
+        this.setState({replyLoading:true});
+        rp({
+            method: 'get',
+            url: `https://us-central1-worf-js.cloudfunctions.net/helloworld?message=${this.state.reply}`,
+            json: true
+        }).then(res => {
+            if (res.pass) {
+                let comments = this.state.comments;
+                comments[id].replies = [...comments[id].replies, { username: 'Guest', date: moment(), text: this.state.reply}];
+                this.setState({reply: '', comments: comments, replySentiment: '', replyLoading: false})
+            } else {
+                if (res.problemIndices === -1) {
+                    this.setState({
+                        reply: `<span class="error">${this.state.reply}</span>`,
+                        replySentiment: 'You might want to rewrite your entire message.',
+                        replyLoading: false
+                    })
+
+                } else {
+                    let sentences = this.state.message.match(/([^.?!])*[.?!]?/g);
+
+                    res.problemIndices.forEach((index) => {
+                        sentences[index] = `<span class="error">${sentences[index]}</span>`
+                    });
+
+                    this.setState({
+                        reply: sentences.join(' '),
+                        replySentiment: 'Seems like your are trying to post a negative comment. Consider changing the highlighted messages.',
+                        replyLoading: false
+                    })
+                }
+            }
+        }).catch( err => {
+            console.log(err)
+        });
+    };
 
   render() {
-      console.log(this.state)
     return (
       <div className="App">
         <Collection header={`${this.state.comments.length} Comments`}>
             <CollectionItem>
-                <FormInput message={this.state.message}
+                <FormInput value={this.state.message}
+                           name="message"
                            loading={this.state.loading}
                            sentiment={this.state.sentiment}
                            handleMessageInput={this.handleMessageInput}
@@ -146,14 +187,35 @@ class App extends Component {
 
                                 <p className="message">{comment.text}</p>
 
-                                <Button className="reply-button" onClick={this.replySupport}>Reply</Button>
+                                <Collapsible>
+                                    <CollapsibleItem header='Reply'>
+                                        <FormInput value={this.state.reply}
+                                                   name="reply"
+                                                   sentiment={this.state.replySentiment}
+                                                   loading={this.state.replyLoading}
+                                                   commentId={idx}
+                                                   handleMessageInput={this.handleReplyInput}
+                                                   handleClearMessage={this.handleClearReply}
+                                                   handleSubmit={this.handleSubmitReply}/>
+                                    </CollapsibleItem>
+                                </Collapsible>
 
                                 {
-                                    this.state.reply && (<FormInput message={this.state.message}
-                                                                   handleMessageInput={this.handleMessageInput}
-                                                                   sentiment={this.state.sentiment}
-                                                                   handleClearMessage={this.handleClearMessage}
-                                                                   handleSubmit={this.handleSubmit}/>)
+                                    comment.replies && comment.replies.length > 0 && comment.replies.map((comment, idx)=> {
+                                        return (
+                                            <div key={idx} s={12}>
+                                                <Chip>
+                                                    <img
+                                                        src={comment.image || 'https://owl.cbsi.com/jira/secure/useravatar?ownerId=kbasireddy&avatarId=12915'}
+                                                        width='20' alt="profile image"/>
+                                                    {comment.username}
+                                                </Chip>
+                                                <small>{moment(comment.date).fromNow()}</small>
+                                                <p className="message">{comment.text}</p>
+                                            </div>
+
+                                        )
+                                    })
                                 }
                             </Card>
                         )
