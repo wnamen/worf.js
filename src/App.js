@@ -165,6 +165,7 @@ class App extends Component {
         <h3>Worf.js</h3>
         <div className="App">
         <Collection header={`${this.state.comments.length} Comments`}>
+            <div className="hr-divider"></div>
             <CollectionItem>
                 <FormInput value={this.state.message}
                            name="message"
@@ -190,7 +191,7 @@ class App extends Component {
                                 <p className="message">{comment.text}</p>
 
                                 <Collapsible>
-                                    <CollapsibleItem header='Reply'>
+                                    <CollapsibleItem header='REPLY'>
                                         <FormInput value={this.state.reply}
                                                    name="reply"
                                                    sentiment={this.state.replySentiment}
