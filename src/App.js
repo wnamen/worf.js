@@ -161,7 +161,9 @@ class App extends Component {
 
   render() {
     return (
-      <div className="App">
+        <div className="app-container">
+        <h3>Worf.js</h3>
+        <div className="App">
         <Collection header={`${this.state.comments.length} Comments`}>
             <CollectionItem>
                 <FormInput value={this.state.message}
@@ -179,7 +181,7 @@ class App extends Component {
                             <Card key={idx} s={12}>
                                 <div>
                                     <Chip>
-                                        <img src={comment.image || 'https://owl.cbsi.com/jira/secure/useravatar?ownerId=kbasireddy&avatarId=12915'} width='20' alt="profile image"/>
+                                        <img src={comment.image || 'https://owl.cbsi.com/jira/secure/useravatar?avatarId=10122'} width='20' alt="profile image"/>
                                         {comment.username}
                                     </Chip>
                                     <small>{moment(comment.date).fromNow()}</small>
@@ -203,7 +205,7 @@ class App extends Component {
                                 {
                                     comment.replies && comment.replies.length > 0 && comment.replies.map((comment, idx)=> {
                                         return (
-                                            <div key={idx} s={12}>
+                                            <div className="reply-message" key={idx} s={12}>
                                                 <Chip>
                                                     <img
                                                         src={comment.image || 'https://owl.cbsi.com/jira/secure/useravatar?ownerId=kbasireddy&avatarId=12915'}
@@ -224,6 +226,7 @@ class App extends Component {
             </CollectionItem>
         </Collection>
       </div>
+    </div>
     );
   }
 }

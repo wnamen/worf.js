@@ -1,7 +1,18 @@
-.App {
+.app-container{
+    width: 70%;
+}
+.app-container h3{
+    font-size: 40px;
+    font-style: italic;
+    color: #008575;
+    padding-left: 10%;
+}
+.App, .collection-item .collapsible-body .App {
     padding: 5px;
     margin-left: 10%;
-    width: 70%;
+}
+.collection-item .App{
+    margin-left: 0;
 }
 .card{
     width: 80%;
@@ -31,9 +42,12 @@ span.error-message{
     border-bottom: none;
 }
 .message {
-    text-indent: 50px;
     font-size: 16px;
     padding-top: 5px;
+}
+.reply-message{
+    margin-left: 10%;
+    margin-bottom: 20px;
 }
 button.btn{
     margin:0;
@@ -70,4 +84,16 @@ button.btn.disabled{
 .fa.fa-times-circle{
     color: red;
     font-size: 40px;
+}
+.collapsible{
+    box-shadow: none;
+    border: none;
+}
+.collapsible-body{
+    border-bottom: none;
+}
+.collapsible-header{
+    border-bottom: none;
+    color: rgba(17, 17, 17, 0.6);
+    text-align: right;
 }
