@@ -16,8 +16,8 @@ class FormInput extends Component {
                     this.props.sentiment && (<span className="error-message">{ this.props.sentiment }</span>)
                 }
                 <Row style={{textAlign: 'right'}}>
-                    <Button className="red" onClick={this.props.handleClearMessage}>&#10007;</Button>
-                    <Button onClick={this.props.handleSubmit} disabled={this.props.message.length <= 0}>&#10003;</Button>
+                    <Button onClick={this.props.handleClearMessage}><i className="fa fa-times-circle fa-3x" aria-hidden="true"></i></Button>
+                    <Button onClick={this.props.handleSubmit} disabled={this.props.message.length <= 0 || this.props.sentiment}><i className="fa fa-check-circle fa-3x" aria-hidden="true"></i></Button>
                 </Row>
             </div>
         );
